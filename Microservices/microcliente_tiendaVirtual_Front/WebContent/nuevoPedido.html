@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="ISO-8859-1">
+        <title>Nuevo Pedido</title>
+        <!--Bootstrap-->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1"> 
+
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    </head>
+    <body>
+        <div align="center" ng-app="pedidos" ng-controller="controller" ng-init="productos()">
+            <select ng-model="codigo" class="dropdown">
+                <option class="dropdown-item" ng-repeat="p in productos" ng-value={{p.codigoProducto}}>{{p.producto}}</option>
+            </select>
+            <br/><br/>
+            Unidades: <input type="number" ng-model="unidades"/>
+            <br/><br/>
+            <input class="btn btn-primary" type="button" ng-click="guardar()" value="Guardar Pedido">
+            <br/><br/>
+            <button class="btn btn-info" ng-click="getPedidos()"> Ver pedidos</button>
+            <br/><br/>
+            <table ng-show="verPedidos" class="table table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Unidades</th>
+                        <th>Precio total</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="p in pedidos">
+                        <td ng-init="getProducto(p.codigoProducto)" ng-model="producto">{{producto.producto}}</td>
+                        <td>{{p.unidades}}</td>
+                        <td>{{p.total}}</td>
+                        <td>{{p.fechaPedido}}</td>        
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <script>
+            var app=angular.module("pedidos", []);
+            app.controller("controller", function($scope, $http) {
+                //Acceso por zuul
+               let producto ="http://localhost:8090/sproductos/productos";
+               let pedido ="http://localhost:8090/spedidos/pedidos";
+
+               $scope.verPedidos=false;
+
+               $scope.productos=function(){
+                   $http.get(producto)
+                   .then(function(res){
+                       $scope.productos = res.data;
+                   })
+               }
+
+               $scope.guardar=function(){
+                    let ob = new Object();
+                    ob.codigoProducto = $scope.codigo;
+                    ob.unidades = $scope.unidades;
+                    $http.post(pedido, ob);
+                    alert("Pedidos guardado");
+                    $scope.verPedidos=false;
+               }
+
+               $scope.getPedidos=function(){
+                   $http.get(pedido)
+                   .then(function(res){
+                       $scope.pedidos = res.data;
+                       $scope.verPedidos=true;
+                   })
+               }
+
+               $scope.getProducto=function(codigo){
+                $http.get("http://localhost:8090/sproductos/producto/", {params:{codigo:codigo}})
+                   .then(function(res){
+                       $scope.producto = res.data;
+                   })
+               }
+
+            });
+        </script>
+    </body>
+</html>
