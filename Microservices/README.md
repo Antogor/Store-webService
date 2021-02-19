@@ -1,6 +1,3 @@
-# Store-webService
- A group of microservices that imitate a little store
-This project is a group of three microservices develop in java with SpringBoot, they install in a eureka server, and can access to de services with a zuul server that comunicate with eureka
 ## Products
 A microservice that connect to a products MySQL data base and expose diferents services:
 
